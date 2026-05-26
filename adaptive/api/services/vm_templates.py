@@ -25,11 +25,8 @@ def deploy_vm_template(vm_template: VmTemplate):
         "PACKER_LOG_PATH": str(log_path),
     }
 
-    var_file = cwd / "variables.pkrvars.hcl"
-    packer_args_suffix = ["--var-file", str(var_file)] if var_file.exists() else []
-
     result: subprocess.CompletedProcess[str] = subprocess.run(
-        ["packer", "validate", *packer_args_suffix, "."],
+        ["packer", "validate", "."],
         cwd=cwd,
         env=packer_env,
         capture_output=True,
@@ -50,7 +47,7 @@ def deploy_vm_template(vm_template: VmTemplate):
     def _run():
         try:
             subprocess.run(
-                ["packer", "build", *packer_args_suffix, "."],
+                ["packer", "build", "."],
                 cwd=cwd,
                 env=packer_env,
                 stdout=subprocess.DEVNULL,
