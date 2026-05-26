@@ -1,0 +1,39 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+from sqlalchemy import ForeignKey, String
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from adaptive.api.environment.database import Base
+from adaptive.api.models.group import group_users
+
+if TYPE_CHECKING:
+    from adaptive.api.models.domain import Domain
+    from adaptive.api.models.server import Server
+    from adaptive.api.models.group import Group
+
+class User(Base):
+    """Représente un utilisateur Active Directory."""
+
+    __tablename__ = "users"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+
+    username: Mapped[str] = mapped_column(String(255), nullable=False)
+    password: Mapped[str] = mapped_column(String(255), nullable=False)
+    firstname: Mapped[str] = mapped_column(String(255), nullable=False)
+    lastname: Mapped[str] = mapped_column(String(255), nullable=False)
+
+    domain_id: Mapped[int | None] = mapped_column(ForeignKey("domains.id"), nullable=True)
+    domain: Mapped[Domain | None] = relationship("Domain", back_populates="users")
+
+    server_id: Mapped[int | None] = mapped_column(ForeignKey("servers.id"), nullable=True)
+    server: Mapped[Server | None] = relationship("Server", back_populates="users")
+    groups: Mapped[list[Group]] = relationship(
+        "Group",
+        secondary=group_users,
+        back_populates="users",
+    )
+    def __repr__(self) -> str:
+        return f"<User id={self.id}>"
